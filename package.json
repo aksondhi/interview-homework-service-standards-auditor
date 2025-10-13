@@ -1,0 +1,30 @@
+{
+  "name": "service-standards-auditor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "service-standards-auditor": "dist/cli.js",
+    "ssa": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/cli.js",
+    "dev": "ts-node-esm src/cli.ts",
+    "dev:help": "ts-node-esm src/cli.ts --help",
+    "test": "jest"
+  },
+  "prepare": "npm run build",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "yaml": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.16.0",
+    "typescript": "^5.9.3"
+  }
+}
