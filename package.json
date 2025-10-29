@@ -20,12 +20,21 @@
   },
   "prepare": "npm run build",
   "dependencies": {
+    "chart.js": "^4.5.1",
     "commander": "^12.1.0",
-    "yaml": "^2.5.0"
+    "debug": "^4.4.3",
+    "fast-glob": "^3.3.3",
+    "handlebars": "^4.7.8",
+    "semver": "^7.7.3",
+    "yaml": "^2.5.0",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@eslint/js": "^9.38.0",
+    "@types/debug": "^4.1.12",
+    "@types/handlebars": "^4.0.40",
     "@types/node": "^20.11.0",
+    "@types/semver": "^7.7.1",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "eslint": "^9.38.0",
