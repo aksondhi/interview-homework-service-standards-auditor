@@ -12,7 +12,11 @@
     "start": "node dist/cli.js",
     "dev": "ts-node-esm src/cli.ts",
     "dev:help": "ts-node-esm src/cli.ts --help",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore"
   },
   "prepare": "npm run build",
   "dependencies": {
@@ -20,11 +24,19 @@
     "yaml": "^2.5.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.38.0",
     "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.38.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
     "jest": "^30.2.0",
+    "prettier": "^3.6.2",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "tsx": "^4.16.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2"
   }
 }

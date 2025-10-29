@@ -12,11 +12,13 @@ example services to scan, and simple CI wiring. Candidates can expand or replace
 Build a lightweight **command-line tool** that audits a local repository (or set of repositories) for **engineering best practice compliance**.
 
 ### Your Tool Should
+
 1. **Scan** a codebase (e.g., multiple service folders).
 2. **Evaluate** compliance against a **configurable set of rules** (YAML).
 3. **Generate a compliance report** in **CLI output** and **JSON or Markdown** formats.
 
 ### Requirements (Core)
+
 - Implemented in **TypeScript** (Node 22+).
 - External config (YAML) defining rules.
 - Rules are independently testable/extensible.
@@ -27,6 +29,7 @@ Build a lightweight **command-line tool** that audits a local repository (or set
   - `--outdir` directory to write reports (default: `./reports`)
 
 ### Example Rules
+
 - Must contain a `README.md`
 - Must contain a `Dockerfile`
 - Must contain a `tests/` or `test/` directory
@@ -34,6 +37,7 @@ Build a lightweight **command-line tool** that audits a local repository (or set
 - If Node project, `package.json` must contain a semantic version
 
 ### Bonus Ideas (Optional)
+
 - Utilize Github Copilot or similar AI tools for analysis of code
 - Enable as a GitHub Action
 - Github Action integration to release to Github Registry
@@ -45,6 +49,7 @@ Build a lightweight **command-line tool** that audits a local repository (or set
 ---
 
 ## ⏱️ Timebox
+
 Spend **3–4 days**. Optimize for **clarity, maintainability, and rationale**.
 
 ---
@@ -74,4 +79,5 @@ npm test
 ---
 
 ## 📚 Docs for Reviewers
+
 - See [`RUBRIC.md`](RUBRIC.md) for the internal scoring rubric.
