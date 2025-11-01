@@ -1,0 +1,150 @@
+import glob from 'fast-glob';
+import { readFile, stat } from 'fs/promises';
+import { dirname, relative } from 'path';
+import type { Service, ScannerOptions } from '../types/service.js';
+import { createLogger } from '../utils/logger.js';
+
+const log = createLogger('scanner');
+
+/**
+ * Scans repositories to discover services based on package.json files
+ */
+export class ServiceScanner {
+  private options: ScannerOptions;
+
+  constructor(options: ScannerOptions = {}) {
+    this.options = {
+      maxDepth: options.maxDepth,
+      exclude: options.exclude || [
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/.git/**',
+        '**/coverage/**',
+      ],
+    };
+  }
+
+  /**
+   * Scan a directory for services
+   * @param targetPath - Path to scan
+   * @returns Array of discovered services
+   */
+  async scan(targetPath: string): Promise<Service[]> {
+    log.info('Scanning for services', { path: targetPath });
+
+    // Verify target path exists
+    try {
+      const stats = await stat(targetPath);
+      if (!stats.isDirectory()) {
+        throw new Error(`Path is not a directory: ${targetPath}`);
+      }
+    } catch (error) {
+      log.error('Failed to access target path', { path: targetPath, error });
+      throw error;
+    }
+
+    // Find all package.json files
+    const pattern = this.buildGlobPattern();
+    const globOptions = {
+      cwd: targetPath,
+      absolute: true,
+      ignore: this.options.exclude,
+      onlyFiles: true,
+      deep: this.options.maxDepth,
+    };
+
+    const packageFiles = await glob(pattern, globOptions);
+
+    log.debug('Found package.json files', { count: packageFiles.length });
+
+    // Parse each package.json and create Service objects
+    const services = await Promise.all(
+      packageFiles.map((pkgPath) => this.parseService(String(pkgPath), targetPath))
+    );
+
+    // Filter out any failed parses (null values)
+    const validServices = services.filter((service): service is Service => service !== null);
+
+    log.info('Service scan complete', {
+      total: validServices.length,
+      services: validServices.map((s) => s.name),
+    });
+
+    return validServices;
+  }
+
+  /**
+   * Build glob pattern based on maxDepth option
+   */
+  private buildGlobPattern(): string {
+    if (this.options.maxDepth !== undefined) {
+      // Build pattern with limited depth
+      const parts = ['**/package.json'];
+      return parts.join('/');
+    }
+    return '**/package.json';
+  }
+
+  /**
+   * Parse a package.json file into a Service object
+   */
+  private async parseService(pkgPath: string, basePath: string): Promise<Service | null> {
+    const servicePath = dirname(pkgPath);
+    const relativePath = relative(basePath, servicePath);
+
+    try {
+      const content = await readFile(pkgPath, 'utf-8');
+      const pkg = JSON.parse(content);
+
+      const service: Service = {
+        name: pkg.name || 'unknown',
+        path: servicePath,
+        type: this.detectServiceType(pkg),
+        version: pkg.version,
+        description: pkg.description,
+      };
+
+      log.debug('Parsed service', { name: service.name, path: relativePath });
+
+      return service;
+    } catch (error) {
+      log.error('Failed to parse package.json', {
+        path: relativePath,
+        error,
+      });
+
+      // Return a minimal service object for invalid package.json
+      return {
+        name: 'unknown',
+        path: servicePath,
+        type: 'unknown',
+      };
+    }
+  }
+
+  /**
+   * Detect service type from package.json contents
+   */
+  private detectServiceType(pkg: Record<string, unknown>): string {
+    // Check for common frameworks/dependencies
+    const dependencies = (pkg.dependencies as Record<string, string>) || {};
+    const devDependencies = (pkg.devDependencies as Record<string, string>) || {};
+    const allDeps = { ...dependencies, ...devDependencies };
+
+    if (allDeps.express || allDeps.koa || allDeps.fastify || allDeps.hapi) {
+      return 'node';
+    }
+
+    if (allDeps.react || allDeps.vue || allDeps['@angular/core']) {
+      return 'frontend';
+    }
+
+    if (allDeps.typescript) {
+      return 'node';
+    }
+
+    // Default to node if it has a package.json
+    return 'node';
+  }
+}
