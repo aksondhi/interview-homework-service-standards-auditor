@@ -21,7 +21,7 @@ export const CoverageRuleSchema = BaseRuleSchema.extend({
 
 export const SemverRuleSchema = BaseRuleSchema.extend({
   type: z.literal('semver'),
-  target: z.string().default('package.json'),
+  target: z.string().optional().default('package.json'),
 });
 
 export const CustomRuleSchema = BaseRuleSchema.extend({
