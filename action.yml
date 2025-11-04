@@ -1,0 +1,52 @@
+name: 'Service Standards Auditor'
+description: 'Audit repositories for engineering best practice compliance'
+author: 'aksondhi'
+
+branding:
+  icon: 'check-circle'
+  color: 'green'
+
+inputs:
+  path:
+    description: 'Path to scan for services (default: current directory)'
+    required: false
+    default: '.'
+  config:
+    description: 'Path to configuration YAML file'
+    required: true
+  output:
+    description: 'Output format: json, md, html, or both (json+md)'
+    required: false
+    default: 'both'
+  outdir:
+    description: 'Output directory for reports'
+    required: false
+    default: './reports'
+  fail-on-error:
+    description: 'Fail the action if any required rules fail'
+    required: false
+    default: 'true'
+  comment-pr:
+    description: 'Post audit results as PR comment (requires PR context)'
+    required: false
+    default: 'false'
+  github-token:
+    description: 'GitHub token for posting PR comments (default: github.token)'
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  report-path:
+    description: 'Path to the generated report file(s)'
+  passed:
+    description: 'Whether all required rules passed (true/false)'
+  total-services:
+    description: 'Total number of services audited'
+  passed-services:
+    description: 'Number of services that passed all required rules'
+  pass-rate:
+    description: 'Percentage of services that passed'
+
+runs:
+  using: 'node20'
+  main: 'dist/action.js'

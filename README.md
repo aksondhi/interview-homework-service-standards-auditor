@@ -39,7 +39,7 @@ npm link
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### CLI Usage
 
 ```bash
 # Audit services with a configuration file
@@ -54,6 +54,21 @@ ssa --path . --config standards.yml --output both
 # Generate interactive HTML report
 ssa --path ./services --config rules.yml --output html
 ```
+
+### GitHub Action Usage
+
+Use this tool directly in your GitHub Actions workflows:
+
+```yaml
+- uses: aksondhi/service-standards-auditor@v1
+  with:
+    config: .github/standards.yml
+    path: ./services
+    output: both
+    comment-pr: true
+```
+
+📖 **See [GitHub Action Documentation](.github/ACTION_USAGE.md) for complete usage examples and configuration options.**
 
 ### Using the Binary Aliases
 
