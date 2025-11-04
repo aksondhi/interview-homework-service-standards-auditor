@@ -1,12 +1,38 @@
 {
   "name": "service-standards-auditor",
   "version": "0.1.0",
+  "description": "A CLI tool to audit repositories for engineering best practice compliance (interview project)",
   "private": true,
   "type": "module",
+  "main": "dist/cli.js",
   "bin": {
     "service-standards-auditor": "dist/cli.js",
     "ssa": "dist/cli.js"
   },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "audit",
+    "compliance",
+    "standards",
+    "cli",
+    "best-practices",
+    "quality",
+    "code-quality"
+  ],
+  "author": "Arun Sondhi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aksondhi/interview-homework-service-standards-auditor.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aksondhi/interview-homework-service-standards-auditor/issues"
+  },
+  "homepage": "https://github.com/aksondhi/interview-homework-service-standards-auditor#readme",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -22,7 +48,12 @@
     "lint:fix": "eslint src --ext .ts --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\" --ignore-path .prettierignore",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prepublishOnly": "npm run build && npm test",
+    "version:patch": "npm version patch -m \"chore: bump version to %s\"",
+    "version:minor": "npm version minor -m \"chore: bump version to %s\"",
+    "version:major": "npm version major -m \"chore: bump version to %s\"",
+    "release": "npm run build && npm test && npm publish"
   },
   "lint-staged": {
     "*.{ts,js}": [

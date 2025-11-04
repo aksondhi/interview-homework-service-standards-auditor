@@ -1,0 +1,38 @@
+# Source files
+src/
+tests/
+
+# Build artifacts
+coverage/
+reports/
+*.log
+*.tmp
+
+# Config files
+.github/
+.husky/
+.vscode/
+tsconfig.json
+tsconfig.eslint.json
+jest.config.js
+eslint.config.js
+.eslintcache
+.prettierignore
+
+# Examples and docs
+examples/
+DEVELOPMENT_PLAN.md
+TIMESTAMPS.md
+RUBRIC.md
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
