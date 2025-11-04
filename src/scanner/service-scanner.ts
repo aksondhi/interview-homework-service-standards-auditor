@@ -100,6 +100,7 @@ export class ServiceScanner {
     log.debug('Found package.json files', { count: packageFiles.length });
 
     // Parse each package.json and create Service objects
+    // Using Promise.all for parallel parsing improves performance
     const services = await Promise.all(
       packageFiles.map((pkgPath) => this.parseService(String(pkgPath), targetPath))
     );

@@ -2,6 +2,7 @@ import { ServiceScanner } from '../scanner/service-scanner.js';
 import { RuleEngine } from '../rules/rule-engine.js';
 import { RuleFactory } from '../rules/rule-factory.js';
 import { createLogger } from '../utils/logger.js';
+import { mapWithConcurrency } from '../utils/concurrency.js';
 import type { AuditorConfig } from '../types/config.js';
 import type { AuditReport, ServiceAuditResult } from '../types/result.js';
 
@@ -106,7 +107,11 @@ export class Auditor {
   }
 
   /**
-   * Audit services in parallel
+   * Audit services in parallel with controlled concurrency
+   *
+   * Uses controlled concurrency to avoid overwhelming the system with too many
+   * simultaneous operations. Maximum 10 services are audited concurrently.
+   *
    * @param services - Services to audit
    * @param rules - Rules to execute
    * @returns Service audit results
@@ -115,11 +120,15 @@ export class Auditor {
     services: import('../types/service.js').Service[],
     rules: import('../rules/base-rule.js').BaseRule[]
   ): Promise<ServiceAuditResult[]> {
-    log.info(`Processing ${services.length} services in parallel`);
+    log.info(`Processing ${services.length} services in parallel (max 10 concurrent)`);
 
-    const auditPromises = services.map((service) => this.auditSingleService(service, rules));
+    const results = await mapWithConcurrency(
+      services,
+      async (service) => this.auditSingleService(service, rules),
+      10 // Maximum 10 concurrent service audits
+    );
 
-    return Promise.all(auditPromises);
+    return results;
   }
 
   /**
