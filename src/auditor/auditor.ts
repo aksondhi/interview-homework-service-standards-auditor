@@ -9,12 +9,29 @@ const log = createLogger('auditor');
 
 /**
  * Main auditor orchestration class
- * Combines scanner, rule engine, and factory to audit services
+ *
+ * The Auditor combines the scanner, rule engine, and factory to:
+ * 1. Discover services in a directory
+ * 2. Evaluate rules against each service
+ * 3. Generate a comprehensive audit report
+ *
+ * @example
+ * ```typescript
+ * const config = await parseConfig('./rules.yml');
+ * const auditor = new Auditor(config);
+ * const report = await auditor.audit('./services');
+ * console.log(`Audited ${report.summary.totalServices} services`);
+ * ```
  */
 export class Auditor {
   private config: AuditorConfig;
   private scanner: ServiceScanner;
 
+  /**
+   * Create a new auditor instance
+   *
+   * @param config - Validated auditor configuration with rules and options
+   */
   constructor(config: AuditorConfig) {
     this.config = config;
     this.scanner = new ServiceScanner();
@@ -26,8 +43,14 @@ export class Auditor {
 
   /**
    * Audit all services in a directory
+   *
+   * Discovers services, evaluates configured rules against each service,
+   * and generates a comprehensive audit report with scores and statistics.
+   *
    * @param targetPath - Path to scan for services
-   * @returns Complete audit report
+   * @returns Complete audit report with service results and summary
+   * @throws {ServiceScanError} If service discovery fails
+   * @throws {RuleEvaluationError} If rule execution fails
    */
   async audit(targetPath: string): Promise<AuditReport> {
     log.info(`Starting audit of: ${targetPath}`);

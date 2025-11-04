@@ -9,14 +9,27 @@ const log = createLogger('reporters:factory');
 
 /**
  * Factory for creating reporter instances
- * Handles creation of single or multiple reporters based on output format
+ *
+ * The ReporterFactory maps output format strings to concrete reporter implementations.
+ * It supports creating single or multiple reporters based on the format.
+ *
+ * @example
+ * ```typescript
+ * // Create a single reporter
+ * const reporter = ReporterFactory.createReporter('json');
+ * await reporter.generate(report, './report.json');
+ *
+ * // Create multiple reporters for 'both' format
+ * const reporters = ReporterFactory.createReporters('both');
+ * ```
  */
 export class ReporterFactory {
   /**
    * Create a single reporter for a specific format
+   *
    * @param format - Output format (json, md, or html)
-   * @returns Reporter instance
-   * @throws Error if format is 'both' or invalid
+   * @returns Reporter instance for the specified format
+   * @throws {Error} If format is 'both' (use createReporters instead) or unsupported
    */
   static createReporter(format: OutputFormat): BaseReporter {
     if (format === 'both') {
@@ -42,9 +55,13 @@ export class ReporterFactory {
 
   /**
    * Create reporters for the specified format
-   * For 'both' format, creates JSON and Markdown reporters
-   * @param format - Output format
+   *
+   * For 'both' format, creates both JSON and Markdown reporters.
+   * For single formats, returns an array with one reporter.
+   *
+   * @param format - Output format (json, md, html, or both)
    * @returns Array of reporter instances
+   * @throws {Error} If format is unsupported
    */
   static createReporters(format: OutputFormat): BaseReporter[] {
     log.debug(`Creating reporters for format: ${format}`);

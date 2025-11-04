@@ -7,6 +7,20 @@ import { ConfigurationError, FileSystemError } from '../utils/errors.js';
 
 const logger = createLogger('config');
 
+/**
+ * Parse and validate an auditor configuration file
+ *
+ * @param configPath - Path to the YAML configuration file
+ * @returns Validated auditor configuration
+ * @throws {ConfigurationError} If the configuration file is invalid or validation fails
+ * @throws {FileSystemError} If the configuration file cannot be read
+ *
+ * @example
+ * ```typescript
+ * const config = await parseConfig('./my-rules.yml');
+ * console.log(`Loaded ${config.rules.length} rules`);
+ * ```
+ */
 export async function parseConfig(configPath: string): Promise<AuditorConfig> {
   logger.info(`Loading config from: ${configPath}`);
 

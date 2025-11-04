@@ -14,12 +14,24 @@ const log = createLogger('rules:factory');
 
 /**
  * Factory for creating rule instances from configuration
+ *
+ * The RuleFactory maps rule type strings from the configuration file
+ * to concrete rule implementation classes.
+ *
+ * @example
+ * ```typescript
+ * const config = { type: 'file-exists', name: 'README Check', target: 'README.md' };
+ * const rule = RuleFactory.createRule(config);
+ * const result = await rule.evaluate(service);
+ * ```
  */
 export class RuleFactory {
   /**
    * Create a single rule instance from configuration
-   * @param config - Rule configuration
-   * @returns Rule instance
+   *
+   * @param config - Rule configuration from the config file
+   * @returns Instantiated rule ready for evaluation
+   * @throws {Error} If the rule type is unsupported or custom rules are used
    */
   static createRule(config: RuleConfig): BaseRule {
     log.debug(`Creating rule: ${config.name} (type: ${config.type})`);
@@ -49,8 +61,10 @@ export class RuleFactory {
 
   /**
    * Create multiple rule instances from an array of configurations
-   * @param configs - Array of rule configurations
-   * @returns Array of rule instances
+   *
+   * @param configs - Array of rule configurations from the config file
+   * @returns Array of instantiated rules ready for evaluation
+   * @throws {Error} If any rule type is unsupported
    */
   static createRules(configs: RuleConfig[]): BaseRule[] {
     log.info(`Creating ${configs.length} rules`);

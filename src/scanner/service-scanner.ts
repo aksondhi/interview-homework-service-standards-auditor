@@ -9,10 +9,27 @@ const log = createLogger('scanner');
 
 /**
  * Scans repositories to discover services based on package.json files
+ *
+ * The scanner recursively searches for package.json files and extracts service metadata.
+ * It automatically ignores common build directories and node_modules.
+ *
+ * @example
+ * ```typescript
+ * const scanner = new ServiceScanner({ maxDepth: 3 });
+ * const services = await scanner.scan('./my-monorepo');
+ * console.log(`Found ${services.length} services`);
+ * ```
  */
 export class ServiceScanner {
   private options: ScannerOptions;
 
+  /**
+   * Create a new service scanner
+   *
+   * @param options - Scanner configuration options
+   * @param options.maxDepth - Maximum directory depth to scan
+   * @param options.exclude - Glob patterns for directories to exclude
+   */
   constructor(options: ScannerOptions = {}) {
     this.options = {
       maxDepth: options.maxDepth,
@@ -28,8 +45,14 @@ export class ServiceScanner {
 
   /**
    * Scan a directory for services
-   * @param targetPath - Path to scan
-   * @returns Array of discovered services
+   *
+   * Recursively searches for package.json files and extracts service metadata.
+   * Each package.json found is treated as a separate service.
+   *
+   * @param targetPath - Path to scan for services
+   * @returns Array of discovered services with metadata
+   * @throws {ServiceScanError} If scanning fails
+   * @throws {FileSystemError} If the target path cannot be accessed
    */
   async scan(targetPath: string): Promise<Service[]> {
     log.info('Scanning for services', { path: targetPath });

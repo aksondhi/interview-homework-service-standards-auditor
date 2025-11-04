@@ -1,11 +1,34 @@
 /**
  * Custom error classes for the Service Standards Auditor
+ *
+ * These error classes provide structured error information with context-specific
+ * properties that help with debugging and error reporting.
  */
 
 /**
  * Base error class for all auditor-specific errors
+ *
+ * All custom errors in the application extend this class.
+ * Use the `isAuditorError` type guard to check if an error is an AuditorError.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   // ... operation
+ * } catch (error) {
+ *   if (isAuditorError(error)) {
+ *     console.log(`[${error.code}] ${error.message}`);
+ *   }
+ * }
+ * ```
  */
 export class AuditorError extends Error {
+  /**
+   * Create a new auditor error
+   *
+   * @param message - Human-readable error message
+   * @param code - Optional error code for categorization
+   */
   constructor(
     message: string,
     public readonly code?: string
@@ -18,8 +41,17 @@ export class AuditorError extends Error {
 
 /**
  * Error thrown when configuration is invalid
+ *
+ * This error is thrown when the configuration file cannot be read,
+ * contains invalid YAML, or fails schema validation.
  */
 export class ConfigurationError extends AuditorError {
+  /**
+   * Create a new configuration error
+   *
+   * @param message - Description of the configuration problem
+   * @param configPath - Optional path to the configuration file
+   */
   constructor(
     message: string,
     public readonly configPath?: string
@@ -31,8 +63,18 @@ export class ConfigurationError extends AuditorError {
 
 /**
  * Error thrown when a service cannot be scanned
+ *
+ * This error is thrown when the scanner encounters problems
+ * discovering or reading services.
  */
 export class ServiceScanError extends AuditorError {
+  /**
+   * Create a new service scan error
+   *
+   * @param message - Description of the scan problem
+   * @param servicePath - Path to the service that failed to scan
+   * @param originalError - Optional underlying error that caused the scan to fail
+   */
   constructor(
     message: string,
     public readonly servicePath: string,

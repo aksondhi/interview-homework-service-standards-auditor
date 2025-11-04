@@ -7,14 +7,24 @@ const log = createLogger('rules:engine');
 
 /**
  * Rule execution orchestrator
- * Manages rule registration and execution
+ *
+ * The RuleEngine manages the execution of rules against services.
+ * It supports both sequential and parallel execution modes.
+ *
+ * @example
+ * ```typescript
+ * const engine = RuleEngine.create([rule1, rule2]);
+ * const results = await engine.executeRules(service);
+ * console.log(`${results.filter(r => r.passed).length} rules passed`);
+ * ```
  */
 export class RuleEngine {
   private rules: BaseRule[] = [];
 
   /**
    * Register a rule for execution
-   * @param rule - Rule to register
+   *
+   * @param rule - Rule instance to register
    */
   registerRule(rule: BaseRule): void {
     this.rules.push(rule);
@@ -23,8 +33,12 @@ export class RuleEngine {
 
   /**
    * Execute all registered rules sequentially for a service
-   * @param service - Service to evaluate
-   * @returns Array of rule results
+   *
+   * Rules are evaluated one at a time in registration order.
+   * If a rule throws an error, it is caught and recorded as a failure.
+   *
+   * @param service - Service to evaluate against all rules
+   * @returns Array of rule results, one per registered rule
    */
   async executeRules(service: Service): Promise<RuleResult[]> {
     log.info(`Executing ${this.rules.length} rules for service: ${service.name}`);
