@@ -1,0 +1,87 @@
+# Comprehensive Service Standards Configuration
+# This example demonstrates all available rule types
+
+version: '1.0'
+
+options:
+  parallel: true
+  failFast: false
+
+rules:
+  # Documentation requirements
+  - type: file-exists
+    name: readme
+    target: README.md
+    required: true
+
+  - type: file-exists
+    name: contributing-guide
+    target: CONTRIBUTING.md
+    required: false
+
+  - type: file-exists
+    name: changelog
+    target: CHANGELOG.md
+    required: false
+
+  # Container support
+  - type: file-exists
+    name: dockerfile
+    target: Dockerfile
+    required: true
+
+  - type: file-exists
+    name: dockerignore
+    target: .dockerignore
+    required: false
+
+  # Testing requirements
+  - type: file-exists
+    name: tests-directory
+    target: tests/
+    required: true
+
+  - type: file-exists
+    name: test-files
+    target: "tests/**/*.test.{ts,js}"
+    required: true
+
+  # Code quality
+  - type: coverage
+    name: test-coverage
+    threshold: 80
+    target: coverage/coverage-summary.json
+    required: true
+
+  # Version management
+  - type: semver
+    name: semantic-version
+    target: package.json
+    required: true
+
+  # Configuration files
+  - type: file-exists
+    name: eslint-config
+    target: .eslintrc.*
+    required: false
+
+  - type: file-exists
+    name: prettier-config
+    target: .prettierrc.*
+    required: false
+
+  - type: file-exists
+    name: gitignore
+    target: .gitignore
+    required: true
+
+  # CI/CD
+  - type: file-exists
+    name: github-workflows
+    target: .github/workflows/
+    required: false
+
+  - type: file-exists
+    name: ci-workflow
+    target: .github/workflows/ci.yml
+    required: false

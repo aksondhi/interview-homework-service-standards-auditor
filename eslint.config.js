@@ -28,6 +28,6 @@ export default tseslint.config(
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/', 'reports/', '*.log', '.env'],
+    ignores: ['dist/', 'node_modules/', 'coverage/', 'reports/', 'examples/', '*.log', '.env'],
   }
 );

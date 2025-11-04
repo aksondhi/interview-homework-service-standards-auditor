@@ -1,0 +1,15 @@
+{
+  "name": "non-compliant-service",
+  "version": "not-semver-compliant",
+  "description": "An example service with compliance issues",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "example",
+    "non-compliant"
+  ],
+  "author": "Service Standards Auditor",
+  "license": "MIT"
+}

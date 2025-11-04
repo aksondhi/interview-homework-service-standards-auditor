@@ -1,0 +1,20 @@
+# Minimal Service Standards Configuration
+# Quick setup for essential checks only
+
+version: '1.0'
+
+rules:
+  - type: file-exists
+    name: readme
+    target: README.md
+    required: true
+
+  - type: file-exists
+    name: dockerfile
+    target: Dockerfile
+    required: false
+
+  - type: semver
+    name: version
+    target: package.json
+    required: false

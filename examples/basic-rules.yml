@@ -1,0 +1,29 @@
+# Basic Service Standards Configuration
+# This example shows common file existence checks
+
+version: '1.0'
+
+rules:
+  # Essential documentation
+  - type: file-exists
+    name: readme
+    target: README.md
+    required: true
+
+  # Docker support
+  - type: file-exists
+    name: dockerfile
+    target: Dockerfile
+    required: true
+
+  # Package.json for Node.js services
+  - type: file-exists
+    name: package-json
+    target: package.json
+    required: true
+
+  # Semantic versioning check
+  - type: semver
+    name: semver-version
+    target: package.json
+    required: true
