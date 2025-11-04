@@ -48,9 +48,8 @@ export class HTMLReporter extends BaseReporter {
 
       log.info(`HTML report written successfully to: ${outputPath}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to generate HTML report: ${errorMessage}`);
-      throw new Error(`Failed to generate HTML report: ${errorMessage}`);
+      log.error(`Failed to generate HTML report: ${error}`);
+      this.handleGenerationError(error, outputPath);
     }
   }
 
@@ -58,15 +57,14 @@ export class HTMLReporter extends BaseReporter {
    * Load the Handlebars template
    */
   private async loadTemplate(): Promise<void> {
+    const templatePath = join(__dirname, '..', 'templates', 'report-template.hbs');
     try {
-      const templatePath = join(__dirname, '..', 'templates', 'report-template.hbs');
       const templateContent = await readFile(templatePath, 'utf-8');
       this.template = Handlebars.compile(templateContent);
       log.debug('HTML template loaded successfully');
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to load HTML template: ${errorMessage}`);
-      throw new Error(`Failed to load HTML template: ${errorMessage}`);
+      log.error(`Failed to load HTML template: ${error}`);
+      this.handleGenerationError(error, templatePath);
     }
   }
 

@@ -31,9 +31,8 @@ export class MarkdownReporter extends BaseReporter {
 
       log.info(`Markdown report written successfully to: ${outputPath}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to generate Markdown report: ${errorMessage}`);
-      throw new Error(`Failed to generate Markdown report: ${errorMessage}`);
+      log.error(`Failed to generate Markdown report: ${error}`);
+      this.handleGenerationError(error, outputPath);
     }
   }
 

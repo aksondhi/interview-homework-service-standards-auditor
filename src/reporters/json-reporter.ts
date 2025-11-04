@@ -31,9 +31,8 @@ export class JSONReporter extends BaseReporter {
 
       log.info(`JSON report written successfully to: ${outputPath}`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      log.error(`Failed to generate JSON report: ${errorMessage}`);
-      throw new Error(`Failed to generate JSON report: ${errorMessage}`);
+      log.error(`Failed to generate JSON report: ${error}`);
+      this.handleGenerationError(error, outputPath);
     }
   }
 

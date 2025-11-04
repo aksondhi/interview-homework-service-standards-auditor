@@ -3,6 +3,7 @@ import { readFile, stat } from 'fs/promises';
 import { dirname, relative } from 'path';
 import type { Service, ScannerOptions } from '../types/service.js';
 import { createLogger } from '../utils/logger.js';
+import { ServiceScanError, FileSystemError } from '../utils/errors.js';
 
 const log = createLogger('scanner');
 
@@ -37,11 +38,28 @@ export class ServiceScanner {
     try {
       const stats = await stat(targetPath);
       if (!stats.isDirectory()) {
-        throw new Error(`Path is not a directory: ${targetPath}`);
+        throw new FileSystemError(`Path is not a directory: ${targetPath}`, targetPath, 'access');
       }
     } catch (error) {
-      log.error('Failed to access target path', { path: targetPath, error });
-      throw error;
+      if (error instanceof FileSystemError) {
+        throw error;
+      }
+      const fsError = error as NodeJS.ErrnoException;
+      log.error('Failed to access target path', { path: targetPath, error: fsError.message });
+
+      if (fsError.code === 'ENOENT') {
+        throw new FileSystemError(
+          `Path does not exist: ${targetPath}`,
+          targetPath,
+          'access',
+          fsError
+        );
+      }
+      throw new ServiceScanError(
+        `Failed to scan directory: ${fsError.message}`,
+        targetPath,
+        fsError
+      );
     }
 
     // Find all package.json files

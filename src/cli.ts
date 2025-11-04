@@ -6,6 +6,7 @@ import { parseConfig } from './config/parser.js';
 import { Auditor } from './auditor/auditor.js';
 import { ReporterFactory } from './reporters/reporter-factory.js';
 import { createLogger } from './utils/logger.js';
+import { formatErrorMessage, isAuditorError } from './utils/errors.js';
 import type { OutputFormat } from './types/common.js';
 
 const logger = createLogger('cli');
@@ -102,11 +103,20 @@ async function main(): Promise<void> {
     }
   } catch (error) {
     logger.error('Audit failed:', error);
-    if (error instanceof Error) {
+
+    // Format error message with context
+    if (isAuditorError(error)) {
+      console.error(`\n❌ ${formatErrorMessage(error)}`);
+    } else if (error instanceof Error) {
       console.error(`\n❌ Error: ${error.message}`);
+      if (error.stack) {
+        logger.debug(`Stack trace: ${error.stack}`);
+      }
     } else {
       console.error('\n❌ An unknown error occurred');
+      logger.debug(`Unknown error: ${String(error)}`);
     }
+
     process.exit(1);
   }
 }
