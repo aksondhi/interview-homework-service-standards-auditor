@@ -246,6 +246,12 @@ describe('MarkdownReporter', () => {
       expect(content).toContain('test-service');
       expect(content).toMatch(/❌.*FAILED|FAILED.*❌/); // Service failed
     });
+
+    it('should handle write errors gracefully', async () => {
+      const invalidPath = '/nonexistent/directory/that/does/not/exist/report.md';
+
+      await expect(reporter.generate(mockReport, invalidPath)).rejects.toThrow();
+    });
   });
 
   describe('getFormat', () => {

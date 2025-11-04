@@ -3,5 +3,6 @@
   "compilerOptions": {
     "noEmit": true
   },
-  "include": ["src/**/*", "tests/**/*", "eslint.config.js", "jest.config.js"]
+  "include": ["src/**/*", "tests/**/*", "eslint.config.js", "jest.config.js"],
+  "exclude": ["node_modules", "dist"]
 }

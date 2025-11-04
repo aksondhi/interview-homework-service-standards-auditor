@@ -214,6 +214,14 @@ describe('HTMLReporter', () => {
 
       expect(content).toContain('50'); // score
     });
+
+    it('should handle write errors gracefully', async () => {
+      const invalidPath = '/nonexistent/directory/that/does/not/exist/report.html';
+
+      await expect(reporter.generate(mockReport, invalidPath)).rejects.toThrow(
+        'Failed to generate HTML report'
+      );
+    });
   });
 
   describe('getFormat', () => {
