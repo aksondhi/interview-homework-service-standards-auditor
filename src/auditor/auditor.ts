@@ -45,40 +45,10 @@ export class Auditor {
     const rules = RuleFactory.createRules(this.config.rules);
     log.debug(`Created ${rules.length} rule instances`);
 
-    // Step 3: Audit each service
-    const serviceResults: ServiceAuditResult[] = [];
-
-    for (const service of services) {
-      log.info(`Auditing service: ${service.name}`);
-
-      const engine = new RuleEngine();
-      rules.forEach((rule) => engine.registerRule(rule));
-
-      // Execute rules (parallel or sequential based on config)
-      const ruleResults = this.config.parallel
-        ? await engine.executeRulesParallel(service)
-        : await engine.executeRules(service);
-
-      // Calculate service audit result
-      const passedRules = ruleResults.filter((r) => r.passed).length;
-      const score = ruleResults.length > 0 ? (passedRules / ruleResults.length) * 100 : 0;
-      const allRequiredPassed = this.checkRequiredRules(ruleResults);
-
-      const serviceResult: ServiceAuditResult = {
-        serviceName: service.name,
-        servicePath: service.path,
-        results: ruleResults,
-        passed: allRequiredPassed,
-        score: Math.round(score * 10) / 10, // Round to 1 decimal place
-      };
-
-      serviceResults.push(serviceResult);
-
-      log.debug(`Service ${service.name} audit complete`, {
-        passed: serviceResult.passed,
-        score: serviceResult.score,
-      });
-    }
+    // Step 3: Audit each service (parallel or sequential based on config)
+    const serviceResults = this.config.parallel
+      ? await this.auditServicesParallel(services, rules)
+      : await this.auditServicesSequential(services, rules);
 
     // Step 4: Create final report with summary
     const report = this.createReport(serviceResults);
@@ -90,6 +60,84 @@ export class Auditor {
     });
 
     return report;
+  }
+
+  /**
+   * Audit services sequentially
+   * @param services - Services to audit
+   * @param rules - Rules to execute
+   * @returns Service audit results
+   */
+  private async auditServicesSequential(
+    services: import('../types/service.js').Service[],
+    rules: import('../rules/base-rule.js').BaseRule[]
+  ): Promise<ServiceAuditResult[]> {
+    const serviceResults: ServiceAuditResult[] = [];
+
+    for (const service of services) {
+      const result = await this.auditSingleService(service, rules);
+      serviceResults.push(result);
+    }
+
+    return serviceResults;
+  }
+
+  /**
+   * Audit services in parallel
+   * @param services - Services to audit
+   * @param rules - Rules to execute
+   * @returns Service audit results
+   */
+  private async auditServicesParallel(
+    services: import('../types/service.js').Service[],
+    rules: import('../rules/base-rule.js').BaseRule[]
+  ): Promise<ServiceAuditResult[]> {
+    log.info(`Processing ${services.length} services in parallel`);
+
+    const auditPromises = services.map((service) => this.auditSingleService(service, rules));
+
+    return Promise.all(auditPromises);
+  }
+
+  /**
+   * Audit a single service
+   * @param service - Service to audit
+   * @param rules - Rules to execute
+   * @returns Service audit result
+   */
+  private async auditSingleService(
+    service: import('../types/service.js').Service,
+    rules: import('../rules/base-rule.js').BaseRule[]
+  ): Promise<ServiceAuditResult> {
+    log.info(`Auditing service: ${service.name}`);
+
+    const engine = new RuleEngine();
+    rules.forEach((rule) => engine.registerRule(rule));
+
+    // Execute rules (parallel or sequential based on config)
+    const ruleResults = this.config.parallel
+      ? await engine.executeRulesParallel(service)
+      : await engine.executeRules(service);
+
+    // Calculate service audit result
+    const passedRules = ruleResults.filter((r) => r.passed).length;
+    const score = ruleResults.length > 0 ? (passedRules / ruleResults.length) * 100 : 0;
+    const allRequiredPassed = this.checkRequiredRules(ruleResults);
+
+    const serviceResult: ServiceAuditResult = {
+      serviceName: service.name,
+      servicePath: service.path,
+      results: ruleResults,
+      passed: allRequiredPassed,
+      score: Math.round(score * 10) / 10, // Round to 1 decimal place
+    };
+
+    log.debug(`Service ${service.name} audit complete`, {
+      passed: serviceResult.passed,
+      score: serviceResult.score,
+    });
+
+    return serviceResult;
   }
 
   /**

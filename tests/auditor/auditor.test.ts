@@ -233,6 +233,49 @@ describe('Auditor', () => {
       expect(report.services[0].results).toHaveLength(2);
       expect(report.services[0].results.every((r: RuleResult) => r.passed)).toBe(true);
     });
+
+    it('should process multiple services in parallel when configured', async () => {
+      // Create multiple services
+      const service1Dir = join(testDir, 'service-1');
+      const service2Dir = join(testDir, 'service-2');
+      const service3Dir = join(testDir, 'service-3');
+
+      await mkdir(service1Dir, { recursive: true });
+      await mkdir(service2Dir, { recursive: true });
+      await mkdir(service3Dir, { recursive: true });
+
+      await writeFile(join(service1Dir, 'package.json'), JSON.stringify({ name: 'service-1' }));
+      await writeFile(join(service1Dir, 'README.md'), '# Service 1');
+
+      await writeFile(join(service2Dir, 'package.json'), JSON.stringify({ name: 'service-2' }));
+      await writeFile(join(service2Dir, 'README.md'), '# Service 2');
+
+      await writeFile(join(service3Dir, 'package.json'), JSON.stringify({ name: 'service-3' }));
+      await writeFile(join(service3Dir, 'README.md'), '# Service 3');
+
+      const config: AuditorConfig = {
+        rules: [
+          {
+            name: 'has-readme',
+            type: 'file-exists',
+            target: 'README.md',
+            required: true,
+          },
+        ],
+        parallel: true,
+        failFast: false,
+      };
+
+      const auditor = new Auditor(config);
+      const startTime = Date.now();
+      const report = await auditor.audit(testDir);
+      const duration = Date.now() - startTime;
+
+      expect(report.services).toHaveLength(3);
+      expect(report.summary.passedServices).toBe(3);
+      // Parallel execution should be reasonably fast
+      expect(duration).toBeLessThan(1000);
+    });
   });
 
   describe('Edge Cases', () => {
