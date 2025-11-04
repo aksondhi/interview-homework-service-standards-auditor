@@ -7,6 +7,9 @@
     "service-standards-auditor": "dist/cli.js",
     "ssa": "dist/cli.js"
   },
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js",
