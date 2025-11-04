@@ -43,7 +43,7 @@ rules:
 
   - type: file-exists
     name: test-files
-    target: "tests/**/*.test.{ts,js}"
+    target: 'tests/**/*.test.{ts,js}'
     required: true
 
   # Code quality

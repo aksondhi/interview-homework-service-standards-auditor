@@ -5,3 +5,4 @@ coverage/
 .env
 reports/
 package-lock.json
+*.hbs
