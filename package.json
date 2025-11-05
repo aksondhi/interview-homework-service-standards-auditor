@@ -1,6 +1,6 @@
 {
   "name": "service-standards-auditor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A CLI tool to audit repositories for engineering best practice compliance (interview project)",
   "private": true,
   "type": "module",
@@ -42,6 +42,7 @@
     "start": "node dist/cli.js",
     "dev": "ts-node-esm src/cli.ts",
     "dev:help": "ts-node-esm src/cli.ts --help",
+    "pretest": "npm run build",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
