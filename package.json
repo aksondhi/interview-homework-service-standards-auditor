@@ -37,7 +37,8 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && npm run copy-templates",
+    "copy-templates": "mkdir -p dist/templates && cp -r src/templates/* dist/templates/",
     "start": "node dist/cli.js",
     "dev": "ts-node-esm src/cli.ts",
     "dev:help": "ts-node-esm src/cli.ts --help",
