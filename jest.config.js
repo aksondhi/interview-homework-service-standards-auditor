@@ -17,6 +17,7 @@ export default {
     'src/**/*.ts',
     '!src/**/*.d.ts',
     '!src/cli.ts', // CLI entry point excluded from coverage
+    '!src/action.ts', // GitHub Actions entry point excluded from coverage
   ],
   coverageThreshold: {
     global: {

@@ -7,6 +7,7 @@ import { Auditor } from './auditor/auditor.js';
 import { ReporterFactory } from './reporters/reporter-factory.js';
 import { createLogger } from './utils/logger.js';
 import { formatErrorMessage, isAuditorError } from './utils/errors.js';
+import { ProgressFactory } from './utils/progress.js';
 import type { OutputFormat } from './types/common.js';
 
 const logger = createLogger('cli');
@@ -57,21 +58,44 @@ async function main(): Promise<void> {
     logger.info('Starting Service Standards Auditor...');
     logger.debug(`Options: ${JSON.stringify(opts, null, 2)}`);
 
+    // Create progress indicators
+    const enableProgress = ProgressFactory.shouldEnable();
+    const { spinner } = ProgressFactory.create(enableProgress);
+
     // Validate all inputs
+    spinner.start('Validating inputs...');
     await validateInputs();
+    spinner.succeed('Inputs validated');
 
     // Parse configuration
+    spinner.start(`Loading configuration from ${path.basename(opts.config)}...`);
     logger.info(`Loading configuration from ${opts.config}`);
     const config = await parseConfig(opts.config);
     logger.debug(`Configuration loaded: ${config.rules.length} rules`);
+    spinner.succeed(`Configuration loaded (${config.rules.length} rules)`);
 
-    // Run audit
+    // Run audit with progress tracking
+    spinner.start(`Scanning services in ${opts.path}...`);
     logger.info(`Scanning services in ${opts.path}`);
     const auditor = new Auditor(config);
-    const report = await auditor.audit(opts.path);
+
+    // Start audit and switch to progress bar once we know the count
+    spinner.info(`Found services, starting audit...`);
+
+    // Audit with progress callback
+    const report = await auditor.audit(opts.path, (current, total, serviceName) => {
+      // Show progress updates in debug mode
+      logger.debug(`Progress: ${current}/${total} - ${serviceName}`);
+    });
 
     logger.info(
       `Audit complete: ${report.services.length} services scanned, ` +
+        `${report.summary.passedServices} passed, ${report.summary.failedServices} failed`
+    );
+
+    console.log(); // Empty line for spacing
+    console.log(
+      `✅ Audit complete: ${report.services.length} services scanned, ` +
         `${report.summary.passedServices} passed, ${report.summary.failedServices} failed`
     );
 
@@ -79,6 +103,7 @@ async function main(): Promise<void> {
     const reporters = ReporterFactory.createReporters(opts.output as OutputFormat);
     const reportBaseName = 'audit-report';
 
+    spinner.start('Generating reports...');
     for (const reporter of reporters) {
       const extension = reporter.getExtension();
       const reportPath = path.join(opts.outdir, `${reportBaseName}${extension}`);
@@ -86,6 +111,9 @@ async function main(): Promise<void> {
       logger.info(`Generating ${reporter.getFormat()} report: ${reportPath}`);
       await reporter.generate(report, reportPath);
     }
+    spinner.succeed(
+      `Reports generated (${reporters.length} format${reporters.length > 1 ? 's' : ''})`
+    );
 
     // Print summary to console
     console.log('\n✅ Audit complete!');

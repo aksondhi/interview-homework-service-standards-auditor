@@ -9,6 +9,11 @@ import type { AuditReport, ServiceAuditResult } from '../types/result.js';
 const log = createLogger('auditor');
 
 /**
+ * Progress callback for tracking audit progress
+ */
+export type ProgressCallback = (current: number, total: number, serviceName: string) => void;
+
+/**
  * Main auditor orchestration class
  *
  * The Auditor combines the scanner, rule engine, and factory to:
@@ -49,11 +54,12 @@ export class Auditor {
    * and generates a comprehensive audit report with scores and statistics.
    *
    * @param targetPath - Path to scan for services
+   * @param onProgress - Optional callback for tracking progress
    * @returns Complete audit report with service results and summary
    * @throws {ServiceScanError} If service discovery fails
    * @throws {RuleEvaluationError} If rule execution fails
    */
-  async audit(targetPath: string): Promise<AuditReport> {
+  async audit(targetPath: string, onProgress?: ProgressCallback): Promise<AuditReport> {
     log.info(`Starting audit of: ${targetPath}`);
 
     // Step 1: Discover services
@@ -71,8 +77,8 @@ export class Auditor {
 
     // Step 3: Audit each service (parallel or sequential based on config)
     const serviceResults = this.config.parallel
-      ? await this.auditServicesParallel(services, rules)
-      : await this.auditServicesSequential(services, rules);
+      ? await this.auditServicesParallel(services, rules, onProgress)
+      : await this.auditServicesSequential(services, rules, onProgress);
 
     // Step 4: Create final report with summary
     const report = this.createReport(serviceResults);
@@ -90,17 +96,25 @@ export class Auditor {
    * Audit services sequentially
    * @param services - Services to audit
    * @param rules - Rules to execute
+   * @param onProgress - Optional progress callback
    * @returns Service audit results
    */
   private async auditServicesSequential(
     services: import('../types/service.js').Service[],
-    rules: import('../rules/base-rule.js').BaseRule[]
+    rules: import('../rules/base-rule.js').BaseRule[],
+    onProgress?: ProgressCallback
   ): Promise<ServiceAuditResult[]> {
     const serviceResults: ServiceAuditResult[] = [];
+    const total = services.length;
 
-    for (const service of services) {
+    for (let i = 0; i < services.length; i++) {
+      const service = services[i];
       const result = await this.auditSingleService(service, rules);
       serviceResults.push(result);
+
+      if (onProgress) {
+        onProgress(i + 1, total, service.name);
+      }
     }
 
     return serviceResults;
@@ -114,17 +128,29 @@ export class Auditor {
    *
    * @param services - Services to audit
    * @param rules - Rules to execute
+   * @param onProgress - Optional progress callback
    * @returns Service audit results
    */
   private async auditServicesParallel(
     services: import('../types/service.js').Service[],
-    rules: import('../rules/base-rule.js').BaseRule[]
+    rules: import('../rules/base-rule.js').BaseRule[],
+    onProgress?: ProgressCallback
   ): Promise<ServiceAuditResult[]> {
     log.info(`Processing ${services.length} services in parallel (max 10 concurrent)`);
 
+    const total = services.length;
+    let completed = 0;
+
     const results = await mapWithConcurrency(
       services,
-      async (service) => this.auditSingleService(service, rules),
+      async (service) => {
+        const result = await this.auditSingleService(service, rules);
+        completed++;
+        if (onProgress) {
+          onProgress(completed, total, service.name);
+        }
+        return result;
+      },
       10 // Maximum 10 concurrent service audits
     );
 
