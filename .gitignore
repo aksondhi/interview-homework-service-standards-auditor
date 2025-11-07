@@ -81,6 +81,13 @@ out
 # Nuxt.js build / generate output
 .nuxt
 dist
+# Exception: commit the GitHub Action bundle
+!dist/index.js
+!dist/index.js.map
+!dist/licenses.txt
+!dist/sourcemap-register.cjs
+!dist/package.json
+!dist/report-template.hbs
 .output
 
 # Gatsby files
